@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   build-and-test:
@@ -19,9 +22,7 @@ jobs:
         python-version: 3.9
 
     - name: Install dependencies
-      run: |
-        pip install -r requirements.txt
+      run: pip install -r requirements.txt
 
-    - name: Test Docker build
-      run: |
-        docker build -t weather-app .
+    - name: Run the app
+      run: python app.py
