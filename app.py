@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None  # Initialize weather variable
-    test_text = "WEATHERAPP"
+    test_text = "Test for Auto Deployment"
 
 
     if request.method == 'POST':
