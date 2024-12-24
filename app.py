@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None  # Initialize weather variable
-    test_text = "Tashkin has no balls"
+    test_text = "Ted has balls"
 
 
     if request.method == 'POST':
