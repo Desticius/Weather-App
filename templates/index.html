@@ -7,18 +7,19 @@
 </head>
 <body>
     <h1>Weather App</h1>
+    <p>{{ test_text }}</p> <!-- Test text will appear here -->
 
-    <!-- Input form for users to enter a city -->
     <form method="POST">
         <input type="text" name="city" placeholder="Enter city name" required>
         <button type="submit">Get Weather</button>
     </form>
 
-    <!-- Display weather information if it's available -->
     {% if weather %}
         <h2>Weather in {{ weather.city }}</h2>
         <p>Temperature: {{ weather.temperature }}°C</p>
         <p>Description: {{ weather.description }}</p>
+    {% elif weather.error %}
+        <p style="color: red;">{{ weather.error }}</p>
     {% endif %}
 </body>
 </html>
