@@ -6,6 +6,8 @@ app = Flask(__name__)
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None  # Initialize weather variable
+    test_text = "WEATHERAPP"
+
 
     if request.method == 'POST':
         city = request.form.get('city')  # Get city name from form
@@ -31,7 +33,12 @@ def home():
             else:
                 weather = {'error': f"Could not retrieve weather for {city}. Please try again."}
 
-    return render_template('index.html', weather=weather)
+    return render_template('index.html', weather=weather, test_text=test_text)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))  # Default to 5000 if PORT is not set
+    app.run(debug=True, host='0.0.0.0', port=port)
+
+
+
+
