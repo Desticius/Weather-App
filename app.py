@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 # Database setup
 Base = declarative_base()
-engine = create_engine('postgresql://postgres:yourpassword@localhost/weather_app')
+engine = create_engine('postgresql://<weather_app_u8d1_user>:<tZSPLEC3S0ch50Ugd6uQWJygDN6Po0rg>@<dpg-ctltsidumphs73dbr9h0-a>:<5432>/<weather_app_u8d1>')
 Session = sessionmaker(bind=engine)
 session = Session()
 
