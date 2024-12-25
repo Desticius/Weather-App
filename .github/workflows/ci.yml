@@ -25,11 +25,11 @@ jobs:
           --health-retries 3
 
     env:
-      DB_USER: weather_app_u8d1_user
-      DB_PASSWORD: tZSPLEC3S0ch50Ugd6uQWJygDN6Po0rg
-      DB_HOST: dpg-ctltsidumphs73dbr9h0-a
+      DB_USER: postgres
+      DB_PASSWORD: testpassword
+      DB_HOST: localhost
       DB_PORT: 5432
-      DB_NAME: weather_app_u8d1
+      DB_NAME: weather_app
 
     steps:
       - name: Checkout code
