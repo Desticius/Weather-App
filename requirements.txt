@@ -2,3 +2,5 @@ flask
 requests
 SQLAlchemy
 psycopg2-binary
+flask-login
+flask-bcrypt
