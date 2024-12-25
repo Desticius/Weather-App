@@ -1,0 +1,7 @@
+CREATE TABLE weather_cache (
+    id SERIAL PRIMARY KEY,
+    city VARCHAR(100) UNIQUE NOT NULL,
+    temperature FLOAT NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
