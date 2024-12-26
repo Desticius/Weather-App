@@ -36,6 +36,7 @@ class WeatherCache(Base):
     city = Column(String, unique=True)
     temperature = Column(Float)
     description = Column(String)
+    icon = Column(String)  # Add icon to cache
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(engine)
@@ -80,7 +81,7 @@ def logout():
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None
-    test_text = "Caching Enabled"
+    test_text = "Welcome to Ben's Weather App!"
 
     if request.method == 'POST':
         city = request.form.get('city')
@@ -91,6 +92,7 @@ def home():
                     'city': cache.city,
                     'temperature': cache.temperature,
                     'description': cache.description,
+                    'icon': cache.icon,  # Use cached icon
                 }
             else:
                 api_key = '8697703eabb9caac81bf8df7d1d650dc'
@@ -103,17 +105,19 @@ def home():
                         'city': city,
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
-			'icon': data['weather'][0]['icon'],  # Fetch the weather icon code
+                        'icon': data['weather'][0]['icon'],  # Fetch icon code
                     }
                     if cache:
                         cache.temperature = data['main']['temp']
                         cache.description = data['weather'][0]['description']
+                        cache.icon = data['weather'][0]['icon']  # Update icon in cache
                         cache.timestamp = datetime.utcnow()
                     else:
                         new_cache = WeatherCache(
                             city=city,
                             temperature=data['main']['temp'],
-                            description=data['weather'][0]['description']
+                            description=data['weather'][0]['description'],
+                            icon=data['weather'][0]['icon']
                         )
                         session.add(new_cache)
                     session.commit()
