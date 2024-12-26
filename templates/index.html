@@ -45,6 +45,7 @@
             <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title">Weather in {{ weather.city }}</h2>
+                    <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="{{ weather.description }}" class="mb-3">
                     <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
                     <p class="card-text">Description: <strong>{{ weather.description }}</strong></p>
                 </div>

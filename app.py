@@ -103,6 +103,7 @@ def home():
                         'city': city,
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
+			'icon': data['weather'][0]['icon'],  # Fetch the weather icon code
                     }
                     if cache:
                         cache.temperature = data['main']['temp']
