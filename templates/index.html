@@ -9,18 +9,25 @@
 </head>
 <body class="bg-light">
     <div class="container mt-5">
-        <h1 class="text-center text-primary">Weather App</h1>
-        <p class="text-center">{{ test_text }}</p> <!-- Test text will appear here -->
+        <!-- Title -->
+        <h1 class="text-center text-primary mb-4">Weather App</h1>
+        <p class="text-center text-muted">{{ test_text }}</p> <!-- Test text will appear here -->
 
         <!-- Authentication Links -->
-        <div class="text-end mb-3">
-            {% if current_user.is_authenticated %}
-                <p>Welcome, <strong>{{ current_user.username }}</strong>!</p>
-                <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
-            {% else %}
-                <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Login</a>
-                <a href="{{ url_for('register') }}" class="btn btn-secondary btn-sm">Register</a>
-            {% endif %}
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                {% if current_user.is_authenticated %}
+                    <p class="mb-0">Welcome, <strong>{{ current_user.username }}</strong>!</p>
+                {% endif %}
+            </div>
+            <div>
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Login</a>
+                    <a href="{{ url_for('register') }}" class="btn btn-secondary btn-sm">Register</a>
+                {% endif %}
+            </div>
         </div>
 
         <!-- Weather Form -->
@@ -33,7 +40,7 @@
 
         <!-- Weather Results -->
         {% if weather %}
-            <div class="card text-center">
+            <div class="card text-center shadow-sm">
                 <div class="card-body">
                     <h2 class="card-title">Weather in {{ weather.city }}</h2>
                     <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
