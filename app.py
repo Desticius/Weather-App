@@ -1,20 +1,33 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import logout_user, login_required
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required
 import requests
 from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
+from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 import os
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # Required for flashing messages
+app.secret_key = 'your-secret-key'  # For session management
+
+# Flask-Login setup
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
 # Database setup
 Base = declarative_base()
 engine = create_engine(f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}")
 Session = sessionmaker(bind=engine)
 session = Session()
+
+# User model
+class User(Base):
+    __tablename__ = 'users'
+    id = Column(Integer, primary_key=True)
+    username = Column(String, unique=True, nullable=False)
+    password = Column(String, nullable=False)
 
 # Weather cache model
 class WeatherCache(Base):
@@ -27,15 +40,43 @@ class WeatherCache(Base):
 
 Base.metadata.create_all(engine)
 
-# Route for logging out
+@login_manager.user_loader
+def load_user(user_id):
+    return session.query(User).get(int(user_id))
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        user = session.query(User).filter_by(username=username).first()
+        if user and check_password_hash(user.password, password):
+            login_user(user)
+            flash('Login successful.', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash('Invalid username or password.', 'danger')
+    return render_template('login.html')
+
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = generate_password_hash(request.form['password'])
+        new_user = User(username=username, password=password)
+        session.add(new_user)
+        session.commit()
+        flash('Registration successful. Please login.', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html')
+
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
-    flash('You have been logged out.', 'info')  # Inform the user about logout
+    flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
-# Home route with weather functionality
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None
@@ -44,7 +85,6 @@ def home():
     if request.method == 'POST':
         city = request.form.get('city')
         if city:
-            # Check cache for existing data
             cache = session.query(WeatherCache).filter_by(city=city).first()
             if cache and cache.timestamp > datetime.utcnow() - timedelta(seconds=30):
                 weather = {
@@ -53,7 +93,6 @@ def home():
                     'description': cache.description,
                 }
             else:
-                # Fetch fresh weather data from OpenWeather API
                 api_key = '8697703eabb9caac81bf8df7d1d650dc'
                 url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
                 response = requests.get(url)
@@ -65,7 +104,6 @@ def home():
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
                     }
-                    # Update cache or create a new cache entry
                     if cache:
                         cache.temperature = data['main']['temp']
                         cache.description = data['weather'][0]['description']
@@ -83,4 +121,3 @@ def home():
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
-
