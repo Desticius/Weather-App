@@ -62,7 +62,7 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = generate_password_hash(request.form['password'])
+        password = generate_password_hash(request.form['password'])  # Hash password here
         new_user = User(username=username, password=password)
         session.add(new_user)
         session.commit()
