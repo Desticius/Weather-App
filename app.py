@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from flask_login import LoginManager, current_user, login_user, logout_user, login_required
+from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
 import requests
 from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 import os
 
 app = Flask(__name__)
-app.secret_key = 'your-secret-key'  # For session management
+app.secret_key = 'your-secret-key'
 
 # Flask-Login setup
 login_manager = LoginManager()
@@ -22,8 +22,8 @@ engine = create_engine(f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PA
 Session = sessionmaker(bind=engine)
 session = Session()
 
-# User model
-class User(Base):
+# User model with UserMixin
+class User(Base, UserMixin):
     __tablename__ = 'users'
     id = Column(Integer, primary_key=True)
     username = Column(String, unique=True, nullable=False)
@@ -62,7 +62,7 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = generate_password_hash(request.form['password'])  # Hash password here
+        password = generate_password_hash(request.form['password'])  # Hash password
         new_user = User(username=username, password=password)
         session.add(new_user)
         session.commit()
