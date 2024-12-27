@@ -36,7 +36,7 @@ class WeatherCache(Base):
     city = Column(String, unique=True)
     temperature = Column(Float)
     description = Column(String)
-    icon = Column(String)  # Add icon to cache
+    icon = Column(String)  # Icon column added
     timestamp = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(engine)
@@ -88,6 +88,7 @@ def home():
         if city:
             cache = session.query(WeatherCache).filter_by(city=city).first()
             if cache and cache.timestamp > datetime.utcnow() - timedelta(seconds=30):
+                # Use cached data
                 weather = {
                     'city': cache.city,
                     'temperature': cache.temperature,
@@ -95,7 +96,8 @@ def home():
                     'icon': cache.icon,  # Use cached icon
                 }
             else:
-                api_key = '8697703eabb9caac81bf8df7d1d650dc'
+                # Fetch data from OpenWeather API
+                api_key = 'your-api-key'
                 url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
                 response = requests.get(url)
 
@@ -105,12 +107,13 @@ def home():
                         'city': city,
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
-                        'icon': data['weather'][0]['icon'],  # Fetch icon code
+                        'icon': data['weather'][0]['icon'],  # Fetch icon
                     }
+                    # Update or add cache
                     if cache:
                         cache.temperature = data['main']['temp']
                         cache.description = data['weather'][0]['description']
-                        cache.icon = data['weather'][0]['icon']  # Update icon in cache
+                        cache.icon = data['weather'][0]['icon']
                         cache.timestamp = datetime.utcnow()
                     else:
                         new_cache = WeatherCache(
