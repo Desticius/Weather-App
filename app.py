@@ -51,12 +51,17 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = session.query(User).filter_by(username=username).first()
-        if user and check_password_hash(user.password, password):
-            login_user(user)
-            flash('Login successful.', 'success')
-            return redirect(url_for('home'))
+        
+        if user:
+            if check_password_hash(user.password, password):
+                login_user(user)
+                flash('Login successful.', 'success')
+                return redirect(url_for('home'))
+            else:
+                flash('Incorrect password. Please try again.', 'danger')
         else:
-            flash('Invalid username or password.', 'danger')
+            flash('Username not found. Please try again.', 'danger')
+            
     return render_template('login.html')
 
 @app.route('/register', methods=['GET', 'POST'])
