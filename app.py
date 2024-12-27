@@ -63,13 +63,30 @@ def login():
 def register():
     if request.method == 'POST':
         username = request.form['username']
-        password = generate_password_hash(request.form['password'])  # Hash password
-        new_user = User(username=username, password=password)
-        session.add(new_user)
-        session.commit()
-        flash('Registration successful. Please login.', 'success')
-        return redirect(url_for('login'))
+        password = request.form['password']
+
+        # Check if the username already exists
+        existing_user = session.query(User).filter_by(username=username).first()
+        if existing_user:
+            flash('Username already exists. Please choose a different one.', 'danger')
+            return redirect(url_for('register'))
+
+        # Hash the password and create a new user
+        hashed_password = generate_password_hash(password, method='pbkdf2:sha256', salt_length=8)
+        new_user = User(username=username, password=hashed_password)
+        
+        try:
+            session.add(new_user)
+            session.commit()
+            flash('Registration successful. Please login.', 'success')
+            return redirect(url_for('login'))
+        except Exception as e:
+            session.rollback()  # Roll back in case of any other database errors
+            flash('An error occurred. Please try again.', 'danger')
+            print(f"Error during registration: {e}")
+
     return render_template('register.html')
+
 
 @app.route('/logout')
 @login_required
