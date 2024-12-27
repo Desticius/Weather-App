@@ -18,7 +18,7 @@ login_manager.login_view = 'login'
 
 # Database setup
 Base = declarative_base()
-engine = create_engine(f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}")
+engine = create_engine("postgresql://weather_app_u8d1_user:tZSPLEC3S0ch50Ugd6uQWJygDN6Po0rg@dpg-ctltsidumphs73dbr9h0-a.oregon-postgres.render.com:5432/weather_app_u8d1")
 Session = sessionmaker(bind=engine)
 session = Session()
 
