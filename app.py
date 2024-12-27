@@ -18,7 +18,9 @@ login_manager.login_view = 'login'
 
 # Database setup
 Base = declarative_base()
-engine = create_engine("postgresql://weather_app_u8d1_user:tZSPLEC3S0ch50Ugd6uQWJygDN6Po0rg@dpg-ctltsidumphs73dbr9h0-a.oregon-postgres.render.com:5432/weather_app_u8d1")
+engine = create_engine(
+    "postgresql://weather_app_u8d1_user:tZSPLEC3S0ch50Ugd6uQWJygDN6Po0rg@dpg-ctltsidumphs73dbr9h0-a.oregon-postgres.render.com:5432/weather_app_u8d1"
+)
 Session = sessionmaker(bind=engine)
 session = Session()
 
@@ -39,6 +41,15 @@ class WeatherCache(Base):
     icon = Column(String)  # Icon column added
     timestamp = Column(DateTime, default=datetime.utcnow)
 
+# User profiles
+class Profile(Base):
+    __tablename__ = 'profiles'
+    id = Column(Integer, primary_key=True)
+    user_id = Column(Integer, unique=True, nullable=False)  # Foreign key to User table
+    email = Column(String, unique=True, nullable=False)
+    favorite_cities = Column(String)  # Comma-separated list of favorite cities
+
+# Ensure all tables are created
 Base.metadata.create_all(engine)
 
 @login_manager.user_loader
@@ -100,6 +111,36 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+@app.route('/profile/<username>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_profile(username):
+    user = session.query(User).filter_by(username=username).first()
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('home'))
+
+    profile = session.query(Profile).filter_by(user_id=user.id).first()
+
+    if request.method == 'POST':
+        email = request.form['email']
+        favorite_cities = request.form['favorite_cities']
+
+        if profile:
+            profile.email = email
+            profile.favorite_cities = favorite_cities
+        else:
+            profile = Profile(user_id=user.id, email=email, favorite_cities=favorite_cities)
+            session.add(profile)
+
+        session.commit()
+        flash('Profile updated successfully!', 'success')
+        return redirect(url_for('profile', username=username))
+
+    return render_template('edit_profile.html', user=user, profile=profile)
+
+
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None
@@ -119,7 +160,7 @@ def home():
                 }
             else:
                 # Fetch data from OpenWeather API
-                api_key = 'your-api-key'
+                api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
                 url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=8697703eabb9caac81bf8df7d1d650dc"
                 response = requests.get(url)
 
