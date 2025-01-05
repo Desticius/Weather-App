@@ -17,11 +17,7 @@
         <div class="text-end mb-3">
             {% if current_user.is_authenticated %}
                 <p>Welcome, <strong>{{ current_user.username }}</strong>!</p>
-<<<<<<< HEAD
-                <<a href="{{ url_for('edit_profile', username=current_user.username) }}" class="btn btn-info btn-sm">Profile</a
-=======
                 <a href="{{ url_for('edit_profile', username=current_user.username) }}" class="btn btn-info btn-sm">Profile</a>
->>>>>>> 1d6af16 (new fix 05/01/15)
                 <a href="{{ url_for('logout') }}" class="btn btn-danger btn-sm">Logout</a>
             {% else %}
                 <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">Login</a>
@@ -45,34 +41,6 @@
                 <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon for {{ weather.description }}" class="mb-3">
                 <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
                 <p class="card-text">Description: <strong>{{ weather.description }}</strong></p>
-<<<<<<< HEAD
-                <p>Current Time: <strong>{{ weather.time | datetime }}</strong></p>
-                <p>Sunrise: <strong>{{ weather.sunrise | datetime }}</strong></p>
-                <p>Sunset: <strong>{{ weather.sunset | datetime }}</strong></p>
-            </div>
-        </div>
-        
-        {% elif weather.error %}
-            <div class="alert alert-danger text-center" role="alert">
-                {{ weather.error }}
-            </div>
-        {% endif %}
-    </div>
-
-    <div class="card">
-        <div class="card-body">
-            <h3>Weather in {{ weather.city }}</h3>
-            <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="{{ weather.description }}">
-            <p>Temperature: <strong>{{ weather.temperature }}°C</strong></p>
-            <p>Description: <strong>{{ weather.description }}</strong></p>
-            <p>Current Time: <strong>{{ weather.time | datetime }}</strong></p>
-            <p>Sunrise: <strong>{{ weather.sunrise | datetime }}</strong></p>
-            <p>Sunset: <strong>{{ weather.sunset | datetime }}</strong></p>
-        </div>
-    </div>
-    
-
-=======
                 {% if weather.time %}
                     <p>Current Time: <strong>{{ weather.time | datetime }}</strong></p>
                 {% endif %}
@@ -91,12 +59,7 @@
         {% endif %}
     </div>
 
->>>>>>> 1d6af16 (new fix 05/01/15)
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-<<<<<<< HEAD
-
-=======
->>>>>>> 1d6af16 (new fix 05/01/15)
