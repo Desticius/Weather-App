@@ -161,7 +161,7 @@ def edit_profile(username):
 @app.route('/', methods=['GET', 'POST'])
 def home():
     weather = None
-    test_text = "Welcome to Ben's Weather App!"
+    test_text = "Welcome to Aer, the Weather App!"
 
     if request.method == 'POST':
         city = request.form.get('city')
@@ -174,11 +174,14 @@ def home():
                     'temperature': cache.temperature,
                     'description': cache.description,
                     'icon': cache.icon,  # Use cached icon
+                    'time': int(datetime.utcnow().timestamp()),  # Current time as fallback
+                    'sunset': None,
+                    'sunrise': None,
                 }
             else:
                 # Fetch data from OpenWeather API
                 api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
-                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=8697703eabb9caac81bf8df7d1d650dc"
+                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
                 response = requests.get(url)
 
                 if response.status_code == 200:
@@ -188,9 +191,9 @@ def home():
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
                         'icon': data['weather'][0]['icon'],  # Fetch icon
-                        'time': data['dt'],
-                        'sunset': data['sys']['sunset'],
-                        'sunrise': data['sys']['sunrise'],
+                        'time': data.get('dt', int(datetime.utcnow().timestamp())),  # Use current UTC timestamp if unavailable
+                        'sunset': data['sys'].get('sunset'),  # Default to None if not present
+                        'sunrise': data['sys'].get('sunrise'),  # Default to None if not present
                     }
                     # Update or add cache
                     if cache:
@@ -207,7 +210,11 @@ def home():
                         )
                         session.add(new_cache)
                     session.commit()
+                else:
+                    flash('Could not fetch weather data. Please try again.', 'danger')
+
     return render_template('index.html', weather=weather, test_text=test_text)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
