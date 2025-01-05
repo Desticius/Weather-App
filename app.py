@@ -183,7 +183,7 @@ def home():
             else:
                 # Fetch data from OpenWeather API
                 api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
-                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
+                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=8697703eabb9caac81bf8df7d1d650dc"
                 response = requests.get(url)
 
                 if response.status_code == 200:
