@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
 from datetime import UTC
 import os
+import pytz
 
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
@@ -45,7 +46,7 @@ class WeatherCache(Base):
     temperature = Column(Float)
     description = Column(String)
     icon = Column(String)  # Icon column added
-    timestamp = Column(DateTime, default=datetime.now)
+    timestamp = Column(DateTime, default=datetime.now(pytz.UTC))
 
 # User profiles
 class Profile(Base):
@@ -168,14 +169,14 @@ def home():
         city = request.form.get('city')
         if city:
             cache = session.query(WeatherCache).filter_by(city=city).first()
-            if cache and cache.timestamp > datetime.now() - timedelta(seconds=30):
+            if cache and cache.timestamp > datetime.now(pytz.UTC)() - timedelta(seconds=30):
                 # Use cached data
                 weather = {
                     'city': cache.city,
                     'temperature': cache.temperature,
                     'description': cache.description,
                     'icon': cache.icon,
-                    'time': int(datetime.now().timestamp()),  # Default to current time if not fetched
+                    'time': int(datetime.now(pytz.UTC)().timestamp()),  # Default to current time if not fetched
                     'sunrise': None,  # Placeholder for sunrise
                     'sunset': None,   # Placeholder for sunset
                 }
@@ -192,7 +193,7 @@ def home():
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
                         'icon': data['weather'][0]['icon'],
-                        'time': data.get('dt', int(datetime.now().timestamp())),
+                        'time': data.get('dt', int(datetime.now(pytz.UTC)().timestamp())),
                         'sunset': data['sys'].get('sunset'),
                         'sunrise': data['sys'].get('sunrise'),
                     }
@@ -201,7 +202,7 @@ def home():
                         cache.temperature = data['main']['temp']
                         cache.description = data['weather'][0]['description']
                         cache.icon = data['weather'][0]['icon']
-                        cache.timestamp = datetime.now()
+                        cache.timestamp = datetime.now(pytz.UTC)()
                     else:
                         new_cache = WeatherCache(
                             city=city,
