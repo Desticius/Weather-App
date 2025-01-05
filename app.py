@@ -169,26 +169,16 @@ def home():
         city = request.form.get('city')
         if city:
             cache = session.query(WeatherCache).filter_by(city=city).first()
-<<<<<<< HEAD
-            if cache and cache.timestamp > datetime.now(pytz.UTC)() - timedelta(seconds=30):
-=======
             if cache and cache.timestamp > datetime.now(pytz.UTC) - timedelta(seconds=30):
->>>>>>> 1d6af16 (new fix 05/01/15)
                 # Use cached data
                 weather = {
                     'city': cache.city,
                     'temperature': cache.temperature,
                     'description': cache.description,
                     'icon': cache.icon,
-<<<<<<< HEAD
-                    'time': int(datetime.now(pytz.UTC)().timestamp()),  # Default to current time if not fetched
-                    'sunrise': None,  # Placeholder for sunrise
-                    'sunset': None,   # Placeholder for sunset
-=======
                     'time': int(datetime.now(pytz.UTC).timestamp()),
                     'sunrise': None,
                     'sunset': None,
->>>>>>> 1d6af16 (new fix 05/01/15)
                 }
             else:
                 # Fetch data from OpenWeather API
@@ -203,11 +193,7 @@ def home():
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
                         'icon': data['weather'][0]['icon'],
-<<<<<<< HEAD
-                        'time': data.get('dt', int(datetime.now(pytz.UTC)().timestamp())),
-=======
                         'time': data.get('dt', int(datetime.now(pytz.UTC).timestamp())),
->>>>>>> 1d6af16 (new fix 05/01/15)
                         'sunset': data['sys'].get('sunset'),
                         'sunrise': data['sys'].get('sunrise'),
                     }
@@ -216,11 +202,7 @@ def home():
                         cache.temperature = data['main']['temp']
                         cache.description = data['weather'][0]['description']
                         cache.icon = data['weather'][0]['icon']
-<<<<<<< HEAD
-                        cache.timestamp = datetime.now(pytz.UTC)()
-=======
                         cache.timestamp = datetime.now(pytz.UTC)
->>>>>>> 1d6af16 (new fix 05/01/15)
                     else:
                         new_cache = WeatherCache(
                             city=city,
@@ -236,10 +218,6 @@ def home():
     return render_template('index.html', weather=weather, test_text=test_text)
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 1d6af16 (new fix 05/01/15)
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(debug=True, host='0.0.0.0', port=port)
