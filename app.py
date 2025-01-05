@@ -111,6 +111,18 @@ def logout():
     flash('You have been logged out.', 'info')
     return redirect(url_for('login'))
 
+@app.route('/profile/<username>')
+@login_required
+def profile(username):
+    user = session.query(User).filter_by(username=username).first()
+    if not user:
+        flash('User not found.', 'danger')
+        return redirect(url_for('home'))
+    
+    profile = session.query(Profile).filter_by(user_id=user.id).first()
+    favorite_cities = profile.favorite_cities.split(',') if profile and profile.favorite_cities else []
+    return render_template('profile.html', user=user, favorite_cities=favorite_cities)
+
 @app.route('/profile/<username>/edit', methods=['GET', 'POST'])
 @login_required
 def edit_profile(username):
