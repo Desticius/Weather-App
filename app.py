@@ -6,6 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+from datetime import UTC
 import os
 
 app = Flask(__name__)
@@ -14,7 +15,7 @@ app.secret_key = 'your-secret-key'
 @app.template_filter("datetime")
 def format_datetime(value):
     """Convert UNIX timestamp to readable date and time."""
-    return datetime.utcfromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
+    return datetime.fromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
 
 # Flask-Login setup
 login_manager = LoginManager()
@@ -44,7 +45,7 @@ class WeatherCache(Base):
     temperature = Column(Float)
     description = Column(String)
     icon = Column(String)  # Icon column added
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=datetime.now)
 
 # User profiles
 class Profile(Base):
@@ -167,17 +168,54 @@ def home():
         city = request.form.get('city')
         if city:
             cache = session.query(WeatherCache).filter_by(city=city).first()
-            if cache and cache.timestamp > datetime.utcnow() - timedelta(seconds=30):
+            if cache and cache.timestamp > datetime.now() - timedelta(seconds=30):
                 # Use cached data
                 weather = {
                     'city': cache.city,
                     'temperature': cache.temperature,
                     'description': cache.description,
-                    'icon': cache.icon,  # Use cached icon
-                    'time': int(datetime.utcnow().timestamp()),  # Current time as fallback
-                    'sunset': None,
-                    'sunrise': None,
+                    'icon': cache.icon,
+                    'time': int(datetime.now().timestamp()),  # Default to current time if not fetched
+                    'sunrise': None,  # Placeholder for sunrise
+                    'sunset': None,   # Placeholder for sunset
                 }
+            else:
+                # Fetch data from OpenWeather API
+                api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
+                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
+                response = requests.get(url)
+
+                if response.status_code == 200:
+                    data = response.json()
+                    weather = {
+                        'city': city,
+                        'temperature': data['main']['temp'],
+                        'description': data['weather'][0]['description'],
+                        'icon': data['weather'][0]['icon'],
+                        'time': data.get('dt', int(datetime.now().timestamp())),
+                        'sunset': data['sys'].get('sunset'),
+                        'sunrise': data['sys'].get('sunrise'),
+                    }
+                    # Update or add cache
+                    if cache:
+                        cache.temperature = data['main']['temp']
+                        cache.description = data['weather'][0]['description']
+                        cache.icon = data['weather'][0]['icon']
+                        cache.timestamp = datetime.now()
+                    else:
+                        new_cache = WeatherCache(
+                            city=city,
+                            temperature=data['main']['temp'],
+                            description=data['weather'][0]['description'],
+                            icon=data['weather'][0]['icon']
+                        )
+                        session.add(new_cache)
+                    session.commit()
+                else:
+                    flash('Could not fetch weather data. Please try again.', 'danger')
+
+    return render_template('index.html', weather=weather, test_text=test_text)
+
             else:
                 # Fetch data from OpenWeather API
                 api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')

@@ -35,14 +35,18 @@
 
         <!-- Weather Results -->
         {% if weather %}
-            <div class="card text-center">
-                <div class="card-body">
-                    <h2 class="card-title">Weather in {{ weather.city }}</h2>
-                    <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon for {{ weather.description }}" class="mb-3">
-                    <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
-                    <p class="card-text">Description: <strong>{{ weather.description }}</strong></p>
-                </div>
+        <div class="card text-center">
+            <div class="card-body">
+                <h2 class="card-title">Weather in {{ weather.city }}</h2>
+                <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon for {{ weather.description }}" class="mb-3">
+                <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
+                <p class="card-text">Description: <strong>{{ weather.description }}</strong></p>
+                <p>Current Time: <strong>{{ weather.time | datetime }}</strong></p>
+                <p>Sunrise: <strong>{{ weather.sunrise | datetime }}</strong></p>
+                <p>Sunset: <strong>{{ weather.sunset | datetime }}</strong></p>
             </div>
+        </div>
+        
         {% elif weather.error %}
             <div class="alert alert-danger text-center" role="alert">
                 {{ weather.error }}
