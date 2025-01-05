@@ -4,3 +4,4 @@ SQLAlchemy
 psycopg2-binary
 flask-login
 flask-bcrypt
+pytz==2024.2
