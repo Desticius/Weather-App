@@ -11,6 +11,11 @@ import os
 app = Flask(__name__)
 app.secret_key = 'your-secret-key'
 
+@app.template_filter("datetime")
+def format_datetime(value):
+    """Convert UNIX timestamp to readable date and time."""
+    return datetime.utcfromtimestamp(value).strftime("%Y-%m-%d %H:%M:%S")
+
 # Flask-Login setup
 login_manager = LoginManager()
 login_manager.init_app(app)
@@ -183,6 +188,9 @@ def home():
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
                         'icon': data['weather'][0]['icon'],  # Fetch icon
+                        'time': data['dt'],
+                        'sunset': data['sys']['sunset'],
+                        'sunrise': data['sys']['sunrise'],
                     }
                     # Update or add cache
                     if cache:
