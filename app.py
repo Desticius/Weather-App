@@ -216,43 +216,6 @@ def home():
 
     return render_template('index.html', weather=weather, test_text=test_text)
 
-            else:
-                # Fetch data from OpenWeather API
-                api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
-                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
-                response = requests.get(url)
-
-                if response.status_code == 200:
-                    data = response.json()
-                    weather = {
-                        'city': city,
-                        'temperature': data['main']['temp'],
-                        'description': data['weather'][0]['description'],
-                        'icon': data['weather'][0]['icon'],  # Fetch icon
-                        'time': data.get('dt', int(datetime.utcnow().timestamp())),  # Use current UTC timestamp if unavailable
-                        'sunset': data['sys'].get('sunset'),  # Default to None if not present
-                        'sunrise': data['sys'].get('sunrise'),  # Default to None if not present
-                    }
-                    # Update or add cache
-                    if cache:
-                        cache.temperature = data['main']['temp']
-                        cache.description = data['weather'][0]['description']
-                        cache.icon = data['weather'][0]['icon']
-                        cache.timestamp = datetime.utcnow()
-                    else:
-                        new_cache = WeatherCache(
-                            city=city,
-                            temperature=data['main']['temp'],
-                            description=data['weather'][0]['description'],
-                            icon=data['weather'][0]['icon']
-                        )
-                        session.add(new_cache)
-                    session.commit()
-                else:
-                    flash('Could not fetch weather data. Please try again.', 'danger')
-
-    return render_template('index.html', weather=weather, test_text=test_text)
-
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
