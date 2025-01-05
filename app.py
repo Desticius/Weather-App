@@ -169,7 +169,7 @@ def home():
         city = request.form.get('city')
         if city:
             cache = session.query(WeatherCache).filter_by(city=city).first()
-            if cache and cache.timestamp > datetime.now(pytz.UTC) - timedelta(seconds=30):
+            if cache and cache.timestamp.replace(tzinfo=pytz.UTC) > datetime.now(pytz.UTC) - timedelta(seconds=30):
                 # Use cached data
                 weather = {
                     'city': cache.city,
