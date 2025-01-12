@@ -63,6 +63,11 @@ Base.metadata.create_all(engine)
 def load_user(user_id):
     return session.query(User).get(int(user_id))
 
+# Serve the favicon explicitly
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static/images', 'favicon.ico')
+
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
