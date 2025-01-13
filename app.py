@@ -5,12 +5,13 @@ from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import send_from_directory
 import pytz
 from datetime import datetime, timedelta
 import os
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = 'your-secret-key'
 
 @app.template_filter("datetime")
