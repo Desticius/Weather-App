@@ -6,7 +6,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import send_from_directory
-import pytz
+import pytz import timezone, utc
 from datetime import datetime, timedelta
 import os
 
@@ -175,36 +175,43 @@ def home():
         city = request.form.get('city')
         if city:
             cache = session.query(WeatherCache).filter_by(city=city).first()
-            if cache and cache.timestamp.replace(tzinfo=pytz.UTC) > datetime.now(pytz.UTC) - timedelta(seconds=30):
+            if cache and cache.timestamp > datetime.now(pytz.UTC) - timedelta(seconds=30):
                 # Use cached data
                 weather = {
                     'city': cache.city,
                     'temperature': cache.temperature,
                     'description': cache.description,
                     'icon': cache.icon,
-                    'time': int(datetime.now(pytz.UTC).timestamp()),
-                    'sunrise': None,
-                    'sunset': None,
+                    'time': cache.timestamp.strftime("%Y-%m-%d %H:%M:%S"),
                 }
             else:
                 # Fetch data from OpenWeather API
                 api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
-
-                
-                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=8697703eabb9caac81bf8df7d1d650dc"
+                url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid={api_key}"
                 response = requests.get(url)
 
                 if response.status_code == 200:
                     data = response.json()
+
+                    # Timezone offset from UTC (seconds)
+                    timezone_offset = data.get('timezone', 0)
+                    local_tz = pytz.timezone('Etc/GMT' + ('+' if timezone_offset < 0 else '-') + str(abs(timezone_offset) // 3600))
+
+                    # Convert timestamps to local time
+                    time_utc = datetime.utcfromtimestamp(data.get('dt', datetime.now(pytz.UTC).timestamp())).replace(tzinfo=pytz.UTC)
+                    sunrise_utc = datetime.utcfromtimestamp(data['sys'].get('sunrise', 0)).replace(tzinfo=pytz.UTC)
+                    sunset_utc = datetime.utcfromtimestamp(data['sys'].get('sunset', 0)).replace(tzinfo=pytz.UTC)
+
                     weather = {
                         'city': city,
                         'temperature': data['main']['temp'],
                         'description': data['weather'][0]['description'],
                         'icon': data['weather'][0]['icon'],
-                        'time': data.get('dt', int(datetime.now(pytz.UTC).timestamp())),
-                        'sunset': data['sys'].get('sunset'),
-                        'sunrise': data['sys'].get('sunrise'),
+                        'time': time_utc.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S"),
+                        'sunrise': sunrise_utc.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S"),
+                        'sunset': sunset_utc.astimezone(local_tz).strftime("%Y-%m-%d %H:%M:%S"),
                     }
+
                     # Update or add cache
                     if cache:
                         cache.temperature = data['main']['temp']
@@ -216,7 +223,8 @@ def home():
                             city=city,
                             temperature=data['main']['temp'],
                             description=data['weather'][0]['description'],
-                            icon=data['weather'][0]['icon']
+                            icon=data['weather'][0]['icon'],
+                            timestamp=datetime.now(pytz.UTC)
                         )
                         session.add(new_cache)
                     session.commit()
@@ -224,6 +232,7 @@ def home():
                     flash('Could not fetch weather data. Please try again.', 'danger')
 
     return render_template('index.html', weather=weather, test_text=test_text)
+
 
 
 if __name__ == '__main__':

@@ -33,31 +33,25 @@
             </div>
         </form>
 
-        <!-- Weather Results -->
-        {% if weather %}
-        <div class="card text-center">
-            <div class="card-body">
-                <h2 class="card-title">Weather in {{ weather.city }}</h2>
-                <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon for {{ weather.description }}" class="mb-3">
-                <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
-                <p class="card-text">Description: <strong>{{ weather.description }}</strong></p>
-                {% if weather.time %}
-                    <p>Current Time: <strong>{{ weather.time | datetime }}</strong></p>
-                {% endif %}
-                {% if weather.sunrise %}
-                    <p>Sunrise: <strong>{{ weather.sunrise | datetime }}</strong></p>
-                {% endif %}
-                {% if weather.sunset %}
-                    <p>Sunset: <strong>{{ weather.sunset | datetime }}</strong></p>
-                {% endif %}
-            </div>
-        </div>
-        {% elif weather.error %}
-        <div class="alert alert-danger text-center" role="alert">
-            {{ weather.error }}
-        </div>
-        {% endif %}
+<!-- Weather Results -->
+{% if weather %}
+<div class="card text-center">
+    <div class="card-body">
+        <h2 class="card-title">Weather in {{ weather.city }}</h2>
+        <img src="http://openweathermap.org/img/wn/{{ weather.icon }}@2x.png" alt="Weather icon for {{ weather.description }}" class="mb-3">
+        <p class="card-text">Temperature: <strong>{{ weather.temperature }}°C</strong></p>
+        <p class="card-text">Description: <strong>{{ weather.description }}</strong></p>
+        <p>Local Time: <strong>{{ weather.time }}</strong></p>
+        <p>Sunrise: <strong>{{ weather.sunrise }}</strong></p>
+        <p>Sunset: <strong>{{ weather.sunset }}</strong></p>
     </div>
+</div>
+{% elif weather.error %}
+<div class="alert alert-danger text-center" role="alert">
+    {{ weather.error }}
+</div>
+{% endif %}
+
 
     <link rel="icon" type="image/x-icon" href="/static/images/favicon.ico">
 
