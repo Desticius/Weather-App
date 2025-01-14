@@ -5,12 +5,13 @@ from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask import send_from_directory
 import pytz
 from datetime import datetime, timedelta
 import os
 
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
 app.secret_key = 'your-secret-key'
 
 @app.template_filter("datetime")
@@ -62,6 +63,11 @@ Base.metadata.create_all(engine)
 @login_manager.user_loader
 def load_user(user_id):
     return session.query(User).get(int(user_id))
+
+# Serve the favicon explicitly
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory('static/images', 'favicon.ico')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -183,6 +189,8 @@ def home():
             else:
                 # Fetch data from OpenWeather API
                 api_key = os.getenv('OPENWEATHER_API_KEY', 'your-api-key')
+
+                
                 url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&units=metric&appid=8697703eabb9caac81bf8df7d1d650dc"
                 response = requests.get(url)
 
