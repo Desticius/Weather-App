@@ -150,15 +150,31 @@ def edit_profile(username):
         email = request.form['email']
         favorite_cities = request.form['favorite_cities']
 
+        # Rollback any pending transactions to avoid conflicts
+        session.rollback()
+
+        # 🔍 Check if email is already used by another profile
+        existing_profile = session.query(Profile).filter(Profile.email == email, Profile.user_id != user.id).first()
+        if existing_profile:
+            flash('Email already in use.', 'danger')
+            return redirect(url_for('profile', username=username))
+
         if profile:
             profile.email = email
             profile.favorite_cities = favorite_cities
+
         else:
             profile = Profile(user_id=user.id, email=email, favorite_cities=favorite_cities)
             session.add(profile)
 
-        session.commit()
-        flash('Profile updated successfully!', 'success')
+        try:
+            session.commit()
+            flash('Profile updated successfully!', 'success')
+        except Exception as e:
+            session.rollback()  # 🛠️ Rollback again if error occurs
+            flash(f'An error occurred: {str(e)}', 'danger')
+            return redirect(url_for('profile', username=username))
+
         return redirect(url_for('profile', username=username))
 
     return render_template('edit_profile.html', user=user, profile=profile)
