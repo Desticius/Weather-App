@@ -2,7 +2,8 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_login import LoginManager, current_user, login_user, logout_user, login_required, UserMixin
 import requests
 from sqlalchemy import create_engine, Column, String, Float, Integer, DateTime
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
+Base = declarative_base()
 from sqlalchemy.orm import sessionmaker
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import send_from_directory
@@ -47,7 +48,8 @@ class WeatherCache(Base):
     temperature = Column(Float)
     description = Column(String)
     icon = Column(String)  # Icon column added
-    timestamp = Column(DateTime, default=datetime.now(pytz.UTC))
+    timestamp = Column(DateTime, default=lambda: datetime.now(pytz.UTC))
+
 
 # User profiles
 class Profile(Base):
